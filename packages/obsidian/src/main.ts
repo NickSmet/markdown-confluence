@@ -69,9 +69,9 @@ export default class ConfluencePlugin extends Plugin {
 		const mermaidRenderer = new ElectronMermaidRenderer(
 			mermaidItems.extraStyleSheets,
 			mermaidItems.extraStyles,
-			mermaidItems.mermaidConfig,
 			mermaidItems.bodyStyles,
 		);
+
 		const confluenceClient = new ObsidianConfluenceClient({
 			host: this.settings.confluenceBaseUrl,
 			authentication: {
@@ -97,7 +97,7 @@ export default class ConfluencePlugin extends Plugin {
 			this.adaptor,
 			settingsLoader,
 			confluenceClient,
-			[new MermaidRendererPlugin(mermaidRenderer)],
+			[new MermaidRendererPlugin(mermaidRenderer, this.settings.mermaid)],
 		);
 	}
 

@@ -40,7 +40,10 @@ async function main() {
 	});
 
 	const publisher = new Publisher(adaptor, settingLoader, confluenceClient, [
-		new MermaidRendererPlugin(new PuppeteerMermaidRenderer()),
+		new MermaidRendererPlugin(
+			new PuppeteerMermaidRenderer(),
+			settings.mermaid,
+		),
 	]);
 
 	const publishFilter = "";

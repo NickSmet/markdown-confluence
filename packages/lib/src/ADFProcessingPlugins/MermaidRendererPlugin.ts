@@ -4,6 +4,7 @@ import { JSONDocNode } from "@atlaskit/editor-json-transformer";
 import { ADFProcessingPlugin, PublisherFunctions } from "./types";
 import { ADFEntity } from "@atlaskit/adf-utils/types";
 import SparkMD5 from "spark-md5";
+import { MermaidConfig } from "../Settings";
 
 export function getMermaidFileName(mermaidContent: string | undefined) {
 	const mermaidText = mermaidContent ?? "flowchart LR\nid1[Missing Chart]";
@@ -18,7 +19,10 @@ export interface ChartData {
 }
 
 export interface MermaidRenderer {
-	captureMermaidCharts(charts: ChartData[]): Promise<Map<string, Buffer>>;
+	captureMermaidCharts(
+		charts: ChartData[],
+		config?: MermaidConfig,
+	): Promise<Map<string, Buffer>>;
 }
 
 export class MermaidRendererPlugin
@@ -28,7 +32,10 @@ export class MermaidRendererPlugin
 			Record<string, UploadedImageData | null>
 		>
 {
-	constructor(private mermaidRenderer: MermaidRenderer) {}
+	constructor(
+		private mermaidRenderer: MermaidRenderer,
+		private config?: MermaidConfig,
+	) {}
 
 	extract(adf: JSONDocNode): ChartData[] {
 		const mermaidNodes = filter(
@@ -63,9 +70,10 @@ export class MermaidRendererPlugin
 		}
 
 		const mermaidChartsAsImages =
-			await this.mermaidRenderer.captureMermaidCharts([
-				...mermaidNodesToUpload,
-			]);
+			await this.mermaidRenderer.captureMermaidCharts(
+				[...mermaidNodesToUpload],
+				this.config,
+			);
 
 		for (const mermaidImage of mermaidChartsAsImages) {
 			const uploadedContent = await supportFunctions.uploadBuffer(

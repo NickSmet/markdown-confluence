@@ -1,4 +1,8 @@
-import { ChartData, MermaidRenderer } from "@markdown-confluence/lib";
+import {
+	ChartData,
+	MermaidRenderer,
+	MermaidConfig,
+} from "@markdown-confluence/lib";
 import path from "path";
 import puppeteer, { PuppeteerLaunchOptions } from "puppeteer";
 import { downloadBrowser } from "puppeteer/lib/esm/puppeteer/node/install.js";
@@ -7,18 +11,40 @@ import url from "url";
 interface RemoteWindowedCustomFunctions {
 	renderMermaidChart: (
 		mermaidData: string,
-		mermaidConfig: unknown,
+		mermaidConfig: MermaidConfig,
 	) => Promise<{ width: number; height: number }>;
 }
+
+const defaultMermaidConfig: MermaidConfig = {
+	theme: "base",
+	themeVariables: {
+		background: "#ffffff",
+		mainBkg: "#ddebff",
+		primaryColor: "#ddebff",
+		primaryTextColor: "#192b50",
+		primaryBorderColor: "#0052cc",
+		secondaryColor: "#ff8f73",
+		secondaryTextColor: "#192b50",
+		secondaryBorderColor: "#df360c",
+		tertiaryColor: "#c0b6f3",
+		tertiaryTextColor: "#fefefe",
+		tertiaryBorderColor: "#5243aa",
+		noteBkgColor: "#ffc403",
+		noteTextColor: "#182a4e",
+		textColor: "#000000",
+		titleColor: "#0052cc",
+	},
+};
 
 export class PuppeteerMermaidRenderer implements MermaidRenderer {
 	async captureMermaidCharts(
 		charts: ChartData[],
+		config?: MermaidConfig,
 	): Promise<Map<string, Buffer>> {
 		const capturedCharts = new Map<string, Buffer>();
+		const mermaidConfig = config || defaultMermaidConfig;
 
 		await downloadBrowser();
-		//for (const chart of charts) {
 		const promises = charts.map(async (chart) => {
 			const puppeteerLaunchConfig = {
 				executablePath: puppeteer.executablePath(),
@@ -48,27 +74,6 @@ export class PuppeteerMermaidRenderer implements MermaidRenderer {
 
 				await page.goto(pathToLoad);
 
-				const mermaidConfig = {
-					theme: "base",
-					themeVariables: {
-						background: "#ffffff",
-						mainBkg: "#ddebff",
-						primaryColor: "#ddebff",
-						primaryTextColor: "#192b50",
-						primaryBorderColor: "#0052cc",
-						secondaryColor: "#ff8f73",
-						secondaryTextColor: "#192b50",
-						secondaryBorderColor: "#df360c",
-						tertiaryColor: "#c0b6f3",
-						tertiaryTextColor: "#fefefe",
-						tertiaryBorderColor: "#5243aa",
-						noteBkgColor: "#ffc403",
-						noteTextColor: "#182a4e",
-						textColor: "#ff0000",
-						titleColor: "#0052cc",
-					},
-				};
-
 				const result = await page.evaluate(
 					(mermaidData, mermaidConfig) => {
 						const { renderMermaidChart } =
@@ -83,7 +88,11 @@ export class PuppeteerMermaidRenderer implements MermaidRenderer {
 					width: result.width,
 					height: result.height,
 				});
-				const imageBuffer = await page.screenshot();
+				const imageBuffer = await page.screenshot({
+					type: "png",
+					quality: 100,
+					omitBackground: false,
+				});
 				capturedCharts.set(chart.name, imageBuffer);
 			} finally {
 				await page.close();
