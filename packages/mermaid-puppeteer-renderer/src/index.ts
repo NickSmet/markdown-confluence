@@ -42,6 +42,11 @@ export class PuppeteerMermaidRenderer implements MermaidRenderer {
 
 		try {
 			const page = await browser.newPage();
+			await page.setViewport({
+				width: 7000,
+				height: 5000,
+				deviceScaleFactor: 4,
+			});
 			const results = new Map<string, Buffer>();
 
 			// Create a temporary HTML file
