@@ -69,6 +69,10 @@ export class MermaidRendererPlugin
 			return imageMap;
 		}
 
+		console.log(
+			"MermaidRendererPlugin: Using config:",
+			JSON.stringify(this.config, null, 2),
+		);
 		const mermaidChartsAsImages =
 			await this.mermaidRenderer.captureMermaidCharts(
 				[...mermaidNodesToUpload],

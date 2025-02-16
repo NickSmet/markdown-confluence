@@ -41,7 +41,12 @@ async function main() {
 
 	const publisher = new Publisher(adaptor, settingLoader, confluenceClient, [
 		new MermaidRendererPlugin(
-			new PuppeteerMermaidRenderer(),
+			new PuppeteerMermaidRenderer({
+				puppeteerConfig: {
+					headless: "new",
+					args: ["--no-sandbox", "--disable-setuid-sandbox"],
+				},
+			}),
 			settings.mermaid,
 		),
 	]);

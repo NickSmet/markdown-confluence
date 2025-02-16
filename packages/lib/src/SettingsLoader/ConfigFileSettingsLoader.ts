@@ -1,5 +1,5 @@
 import path from "path";
-import { ConfluenceSettings, DEFAULT_SETTINGS } from "../Settings";
+import { ConfluenceSettings } from "../Settings";
 import { SettingsLoader } from "./SettingsLoader";
 import fs from "fs";
 import yargs from "yargs";
@@ -44,21 +44,13 @@ export class ConfigFileSettingsLoader extends SettingsLoader {
 				encoding: "utf-8",
 			});
 			const config = JSON.parse(configData);
-
-			const result: Partial<ConfluenceSettings> = {};
-
-			for (const key in DEFAULT_SETTINGS) {
-				if (Object.prototype.hasOwnProperty.call(config, key)) {
-					const propertyKey = key as keyof ConfluenceSettings;
-					const element = config[propertyKey];
-					if (element) {
-						result[propertyKey] = element;
-					}
-				}
-			}
-
-			return result;
-		} catch {
+			console.log(
+				"Loaded config from file:",
+				JSON.stringify(config, null, 2),
+			);
+			return config;
+		} catch (error) {
+			console.error("Error loading config file:", error);
 			return {};
 		}
 	}

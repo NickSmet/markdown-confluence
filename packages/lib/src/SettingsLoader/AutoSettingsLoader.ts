@@ -18,10 +18,16 @@ export class AutoSettingsLoader extends SettingsLoader {
 	}
 
 	private combineSettings(): ConfluenceSettings {
-		let settings: Partial<ConfluenceSettings> = {};
+		let settings = { ...DEFAULT_SETTINGS };
 
 		for (const loader of this.loaders) {
 			const partialSettings = loader.loadPartial();
+			console.log(
+				"Combining settings from loader:",
+				loader.constructor.name,
+				JSON.stringify(partialSettings, null, 2),
+			);
+
 			for (const key in partialSettings) {
 				const propertyKey = key as keyof ConfluenceSettings;
 				if (
@@ -31,20 +37,29 @@ export class AutoSettingsLoader extends SettingsLoader {
 					)
 				) {
 					const element = partialSettings[propertyKey];
-					if (
-						element &&
-						typeof element === typeof DEFAULT_SETTINGS[propertyKey]
-					) {
-						settings = {
-							...settings,
-							[propertyKey]: element,
-						};
+					if (element !== undefined && element !== null) {
+						if (
+							propertyKey === "mermaid" &&
+							typeof element === "object" &&
+							!Array.isArray(element)
+						) {
+							settings.mermaid = {
+								...settings.mermaid,
+								...element,
+							};
+						} else {
+							(settings as any)[propertyKey] = element;
+						}
 					}
 				}
 			}
 		}
 
-		return settings as ConfluenceSettings;
+		console.log(
+			"Final combined settings:",
+			JSON.stringify(settings, null, 2),
+		);
+		return settings;
 	}
 
 	loadPartial(): Partial<ConfluenceSettings> {

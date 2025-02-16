@@ -17,6 +17,10 @@ export const DEFAULT_SETTINGS: ConfluenceSettings = {
 	folderToPublish: "Confluence Pages",
 	contentRoot: process.cwd(),
 	firstHeadingPageTitle: false,
+	mermaid: {
+		theme: "default",
+		themeVariables: {},
+	},
 };
 
 export type MermaidConfig = {
